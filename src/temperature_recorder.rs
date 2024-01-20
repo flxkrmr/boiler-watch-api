@@ -2,23 +2,17 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct State {
-    interval_seconds: u64,
-    delete_older_seconds: u64,
+pub struct RecorderConfig {
+    pub interval_seconds: u64,
+    pub delete_older_seconds: u64,
 }
 
-impl State {
-    pub fn load() -> State {
-        // TODO
-        return State {
-            interval_seconds: 14,
-            delete_older_seconds: 7,
+impl RecorderConfig {
+    pub fn new(interval_seconds: u64, delete_older_seconds: u64) -> Self {
+        return RecorderConfig {
+            interval_seconds,
+            delete_older_seconds,
         };
-    }
-
-    pub fn save(state: State) -> State {
-        // TODO
-        return state;
     }
 }
 

@@ -15,6 +15,7 @@ pub enum DatabaseInitError {
 #[derive(Debug)]
 pub enum DatabaseAccessError {
     Read(rusqlite::Error),
+    Write(rusqlite::Error),
 }
 
 impl Database {
@@ -63,5 +64,23 @@ impl Database {
         let config = config_iter.next().unwrap();
 
         return config.map_err(DatabaseAccessError::Read);
+    }
+
+    pub fn save_recorder_config(
+        &self,
+        config: RecorderConfig,
+    ) -> Result<RecorderConfig, DatabaseAccessError> {
+        self.connection
+            .execute("delete from recorder_config", ())
+            .map_err(DatabaseAccessError::Write)?;
+
+        self.connection
+            .execute(
+                "insert into recorder_config (interval_seconds, delete_older_seconds) values (?1, ?2)",
+                (&config.interval_seconds, &config.delete_older_seconds),
+            )
+            .map_err(DatabaseAccessError::Write)?;
+
+        Ok(config)
     }
 }

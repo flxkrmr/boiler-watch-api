@@ -1,10 +1,14 @@
+pub mod database;
 pub mod temperature_recorder;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use rocket::response::status::BadRequest;
 use rocket::serde::json::Json;
+use rocket::State;
+use std::sync::{Arc, Mutex};
 
-use crate::temperature_recorder::{State, TemperatureRecorder, TemperaturesByTime};
+use crate::database::{Database, DatabaseInitError};
+use crate::temperature_recorder::{RecorderConfig, TemperatureRecorder, TemperaturesByTime};
 
 #[macro_use]
 extern crate rocket;
@@ -39,21 +43,49 @@ fn parse_start_time(start_time: i64) -> Result<DateTime<Utc>, BadRequest<String>
 }
 
 #[get("/state")]
-fn state() -> Json<State> {
-    let state = State::load();
-    Json::from(state)
+fn state(state: &State<AppState>) -> Json<RecorderConfig> {
+    let db = state.db.lock().unwrap();
+    let recorder_config = db.load_recorder_config().unwrap();
+    Json::from(recorder_config)
 }
 
-#[post("/state", data = "<state>")]
-fn update_state(state: Json<State>) -> Json<State> {
-    let state = State::save(state.into_inner());
-    Json::from(state)
+#[post("/state", data = "<recorder_config>")]
+fn update_state(
+    recorder_config: Json<RecorderConfig>,
+    state: &State<AppState>,
+) -> Json<RecorderConfig> {
+    let db = state.db.lock().unwrap();
+    let recorder_config = db
+        .save_recorder_config(recorder_config.into_inner())
+        .unwrap();
+
+    Json::from(recorder_config)
 }
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount(
-        "/",
-        routes![last_temperatures, temperatures_since, state, update_state],
-    )
+#[derive(Debug)]
+enum StartupError {
+    Api(rocket::Error),
+    Database(DatabaseInitError),
+}
+
+struct AppState {
+    db: Arc<Mutex<Database>>,
+}
+
+#[rocket::main]
+async fn main() -> Result<(), StartupError> {
+    let db = Database::new().map_err(StartupError::Database)?;
+    let db = Arc::new(Mutex::new(db));
+
+    rocket::build()
+        .manage(AppState { db })
+        .mount(
+            "/",
+            routes![last_temperatures, temperatures_since, state, update_state],
+        )
+        .launch()
+        .await
+        .map_err(StartupError::Api)?;
+
+    Ok(())
 }
