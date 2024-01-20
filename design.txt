@@ -1,0 +1,32 @@
+GET /temperatures/last
+
+{
+	"date": "2007-08-31T16:47",
+	"temperatures: [
+		{ "name": "Sensor 1", "temperature": 32.2 },
+		{ "name": "Sensor 2", "temperature": 32.2 },
+		{ "name": "Sensor 3", "temperature": 32.2 },
+	]
+}
+
+GET /temperatures/since/2007-08-31T16:47
+[
+	{"date": ...},
+	{"date": ...},
+	{"date": ...}
+]
+
+POST/GET /state
+
+{
+	"intervalSeconds": 10,
+	"deleteOlderSeconds": 60
+}
+
+
+sensors.toml
+
+[sensor-1]
+name = "Sensor 1"
+path = "/usr/src/horst"
+
