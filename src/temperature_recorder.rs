@@ -2,12 +2,12 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct RecorderConfig {
-    pub interval_seconds: u64,
+    pub interval_seconds: u32,
     pub delete_older_seconds: u64,
 }
 
 impl RecorderConfig {
-    pub fn new(interval_seconds: u64, delete_older_seconds: u64) -> Self {
+    pub fn new(interval_seconds: u32, delete_older_seconds: u64) -> Self {
         return Self {
             interval_seconds,
             delete_older_seconds,
@@ -38,5 +38,3 @@ impl TemperaturesByTime {
         return Self { date, temperatures };
     }
 }
-
-pub struct TemperatureRecorder {}
