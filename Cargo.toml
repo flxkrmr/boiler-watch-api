@@ -3,14 +3,14 @@ name = "boiler-watch-api"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 chrono = "0.4.31"
 clokwerk = "0.4.0"
 log = "0.4.20"
+rocket_cors = "0.6.0"
 rusqlite = "0.30.0"
 serde = "1.0.130"
+toml = "0.8.8"
 
 [dependencies.rocket]
 version = "0.5.0-rc.4"

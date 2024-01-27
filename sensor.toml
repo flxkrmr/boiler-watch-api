@@ -1,3 +1,15 @@
-[sensor-1]
+[[sensors]]
 name = "Sensor 1"
-path = "/"
+path = "/home/nixos/sensors/1/temperature"
+
+[[sensors]]
+name = "Sensor 2"
+path = "/home/nixos/sensors/2/temperature"
+
+[[sensors]]
+name = "Sensor 3"
+path = "/home/nixos/sensors/3/temperature"
+
+[[sensors]]
+name = "Sensor 4"
+path = "/home/nixos/sensors/4/temperature"

@@ -1,13 +1,15 @@
 pub mod database;
 pub mod recorder_scheduler;
+pub mod temperature_reader;
 pub mod temperature_recorder;
 
 use rocket::serde::json::Json;
 use rocket::State;
+use rocket_cors::CorsOptions;
 use std::sync::{Arc, Mutex};
 
 use crate::database::{Database, DatabaseAccessError, DatabaseInitError};
-use crate::recorder_scheduler::RecorderScheduler;
+use crate::recorder_scheduler::{RecorderScheduler, RecorderSchedulerError};
 use crate::temperature_recorder::{RecorderConfig, TemperaturesByTime};
 
 #[macro_use]
@@ -20,6 +22,11 @@ enum ResponseError {
     #[response(status = 500, content_type = "json")]
     Internal(String),
 }
+
+// TODO endpoints:
+// clear all temperatures
+// sensor config read
+// logs??
 
 #[get("/temperatures/last")]
 fn get_last_temperatures(
@@ -80,13 +87,13 @@ fn get_config(state: &State<AppState>) -> Result<Json<RecorderConfig>, ResponseE
 fn save_config(
     recorder_config: Json<RecorderConfig>,
     state: &State<AppState>,
-) -> Result<(), ResponseError> {
+) -> Result<Json<RecorderConfig>, ResponseError> {
     let db = state.db.lock().map_err(|err| {
         log::warn!("Error retreiving database from state: {}", err);
         ResponseError::Internal(String::from("Error retreiving database from state"))
     })?;
 
-    let recorder_config = &db
+    let recorder_config = db
         .save_recorder_config(recorder_config.into_inner())
         .map_err(|err| {
             log::warn!("Error saving new recorder config: {:?}", err);
@@ -99,9 +106,10 @@ fn save_config(
     })?;
 
     current_scheduler.stop();
-    current_scheduler.start(recorder_config);
+    // TODO catch error
+    current_scheduler.start(&recorder_config).unwrap();
 
-    Ok(())
+    Ok(Json::from(recorder_config))
 }
 
 #[derive(Debug)]
@@ -109,6 +117,7 @@ enum StartupError {
     Api(rocket::Error),
     DatabaseInit(DatabaseInitError),
     DatabaseAccess(DatabaseAccessError),
+    Scheduler(RecorderSchedulerError),
 }
 
 struct AppState {
@@ -127,10 +136,18 @@ async fn main() -> Result<(), StartupError> {
     let db = Arc::new(Mutex::new(db));
 
     let mut scheduler = RecorderScheduler::new();
-    scheduler.start(recorder_config);
+
+    scheduler
+        .start(recorder_config)
+        .map_err(StartupError::Scheduler)?;
+
     let scheduler = Arc::new(Mutex::new(scheduler));
 
+    let cors_options = CorsOptions::default();
+    let cors = cors_options.to_cors().unwrap();
+
     rocket::build()
+        .attach(cors)
         .manage(AppState { db, scheduler })
         .mount(
             "/",

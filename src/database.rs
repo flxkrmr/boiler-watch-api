@@ -16,6 +16,7 @@ pub enum DatabaseInitError {
 pub enum DatabaseAccessError {
     Read(rusqlite::Error),
     Write(rusqlite::Error),
+    NoConfigFound,
 }
 
 impl Database {
@@ -26,14 +27,14 @@ impl Database {
             .execute(
                 "create table if not exists recorder_config (
                  interval_seconds integer not null,
-                 delete_older_seconds integer not null )",
+                 keep integer not null )",
                 (),
             )
             .map_err(DatabaseInitError::CreateDatabases)?;
 
         connection
             .execute(
-                "insert into recorder_config (interval_seconds, delete_older_seconds)
+                "insert into recorder_config (interval_seconds, keep)
                 select 15, 60
                 where not exists (select * from recorder_config)",
                 (),
@@ -57,7 +58,7 @@ impl Database {
         let mut statement = self
             .connection
             .prepare(
-                "select interval_seconds, delete_older_seconds 
+                "select interval_seconds, keep 
                 from recorder_config",
             )
             .map_err(DatabaseAccessError::Read)?;
@@ -65,15 +66,16 @@ impl Database {
         let mut config_iter = statement
             .query_map([], |row| {
                 let interval_seconds = row.get(0)?;
-                let delete_older_seconds = row.get(1)?;
-                return Ok(RecorderConfig::new(interval_seconds, delete_older_seconds));
+                let keep = row.get(1)?;
+                return Ok(RecorderConfig::new(interval_seconds, keep));
             })
             .map_err(DatabaseAccessError::Read)?;
 
-        // TODO fix unwrap here
-        let config = config_iter.next().unwrap();
-
-        return config.map_err(DatabaseAccessError::Read);
+        if let Some(config) = config_iter.next() {
+            config.map_err(DatabaseAccessError::Read)
+        } else {
+            Err(DatabaseAccessError::NoConfigFound)
+        }
     }
 
     pub fn save_recorder_config(
@@ -86,8 +88,8 @@ impl Database {
 
         self.connection
             .execute(
-                "insert into recorder_config (interval_seconds, delete_older_seconds) values (?1, ?2)",
-                (&config.interval_seconds, &config.delete_older_seconds),
+                "insert into recorder_config (interval_seconds, keep) values (?1, ?2)",
+                (&config.interval_seconds, &config.keep),
             )
             .map_err(DatabaseAccessError::Write)?;
 
@@ -132,12 +134,13 @@ impl Database {
 
     pub fn load_last_temperature(&self) -> Result<Option<TemperaturesByTime>, DatabaseAccessError> {
         let date_max_opt = self.load_youngest_date_of_temperatures()?;
+        let date_max: u64;
 
-        if date_max_opt.is_none() {
+        if let Some(d) = date_max_opt {
+            date_max = d;
+        } else {
             return Ok(None);
         }
-        // TODO ugly...
-        let date_max = date_max_opt.unwrap();
 
         log::debug!("date_max: {}", date_max);
 
@@ -204,6 +207,33 @@ impl Database {
             return Ok(Some(max_date));
         } else {
             return Ok(None);
+        }
+    }
+
+    pub fn save_temperatures(
+        &self,
+        temperatures_by_time: TemperaturesByTime,
+    ) -> Result<(), DatabaseAccessError> {
+        let saving_result: Result<Vec<usize>, DatabaseAccessError> = temperatures_by_time
+            .temperatures()
+            .iter()
+            .map(|temperature| {
+                self.connection
+                    .execute(
+                        "insert into temperatures (date, name, value) values (?1, ?2, ?3)",
+                        (
+                            temperatures_by_time.date(),
+                            temperature.name(),
+                            temperature.value_rounded_as_string(),
+                        ),
+                    )
+                    .map_err(DatabaseAccessError::Write)
+            })
+            .collect();
+
+        match saving_result {
+            Ok(_) => Ok(()),
+            Err(err) => Err(err),
         }
     }
 }

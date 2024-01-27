@@ -4,5 +4,6 @@
       rustc
       cargo
       sqlite
+      dos2unix
     ];
 }
