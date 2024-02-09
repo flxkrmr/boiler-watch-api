@@ -24,7 +24,9 @@ jobs:
         target: arm-unknown-linux-gnueabihf
 
     - name: Install dependencies for cross-compilation
-      run: sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libsqlite3-dev:armhf 
+      run: sudo apt-get install -y gcc-arm-linux-gnueabihf
+    - name: Download SQLite3 development package for ARM
+      run: wget http://ftp.us.debian.org/debian/pool/main/s/sqlite3/libsqlite3-dev_3.36.0-3_armhf.deb && sudo dpkg -i libsqlite3-dev_3.36.0-3_armhf.deb
 
     - name: Build binary for Raspberry Pi
       run: cargo build --release --target=arm-unknown-linux-gnueabihf
