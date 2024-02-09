@@ -22,11 +22,14 @@ jobs:
       with:
         toolchain: stable
         target: arm-unknown-linux-gnueabihf
+    - name: Add sources for armhf
+      run: sudo echo .github/artifacts/sources.list > /etc/apt/sources.list
+      
     - name: Prepare for cross compilation
       run: sudo dpkg --add-architecture armhf && sudo apt-get update
       
     - name: Install dependencies for cross-compilation
-      run: sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross libsqlite3-0:armhf
+      run: sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross libsqlite3-dev:armhf
 
     - name: Build binary for Raspberry Pi
       run: cargo build --release --target=arm-unknown-linux-gnueabihf
