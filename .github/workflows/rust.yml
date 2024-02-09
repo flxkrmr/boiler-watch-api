@@ -25,6 +25,9 @@ jobs:
     - name: Add sources for armhf
       run: sudo sh -c 'cat .github/artifacts/sources.list > /etc/apt/sources.list'
       
+    - name: Lets have a look
+      run: sudo sh -c 'cat /etc/apt/sources.list'
+      
     - name: Prepare for cross compilation
       run: sudo dpkg --add-architecture armhf && sudo apt-get update
       
