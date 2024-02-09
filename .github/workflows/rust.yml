@@ -23,7 +23,7 @@ jobs:
         toolchain: stable
         target: arm-unknown-linux-gnueabihf
     - name: Add sources for armhf
-      run: sudo echo .github/artifacts/sources.list > /etc/apt/sources.list
+      run: sudo sh -c 'echo .github/artifacts/sources.list > /etc/apt/sources.list'
       
     - name: Prepare for cross compilation
       run: sudo dpkg --add-architecture armhf && sudo apt-get update
