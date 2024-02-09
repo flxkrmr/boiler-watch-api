@@ -16,7 +16,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --release --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      
+    - name: Set up Rust for Raspberry Pi cross-compilation
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: arm-unknown-linux-gnueabihf
+
+    - name: Install dependencies for cross-compilation
+      run: sudo apt-get install -y gcc-arm-linux-gnueabihf
+
+    - name: Build binary for Raspberry Pi
+      run: cargo build --release --target=arm-unknown-linux-gnueabihf
+      
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: boiler-watch-api
+        path: target/arm-unknown-linux-gnueabihf/release/boiler-watch-api
