@@ -2,3 +2,12 @@
 address = "127.0.0.1"
 port = 8000
 log_level = "debug"
+
+[test]
+address = "0.0.0.0"
+port = 8000
+log_level = "debug"
+
+[release]
+address = "0.0.0.0"
+port = 8000

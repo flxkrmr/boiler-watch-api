@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.31"
 clokwerk = "0.4.0"
+filesize = "0.2.0"
 log = "0.4.20"
 rocket_cors = "0.6.0"
 rusqlite = "0.30.0"

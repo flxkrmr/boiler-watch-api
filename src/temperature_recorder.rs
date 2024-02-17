@@ -37,17 +37,17 @@ impl Temperature {
 
 #[derive(Serialize, Debug)]
 pub struct TemperaturesByTime {
-    date: String,
+    date: u64,
     temperatures: Vec<Temperature>,
 }
 
 impl TemperaturesByTime {
-    pub fn new(date: String, temperatures: Vec<Temperature>) -> Self {
+    pub fn new(date: u64, temperatures: Vec<Temperature>) -> Self {
         return Self { date, temperatures };
     }
 
-    pub fn date(&self) -> String {
-        self.date.to_owned()
+    pub fn date(&self) -> u64 {
+        self.date
     }
 
     pub fn temperatures(&self) -> Vec<Temperature> {

@@ -21,6 +21,7 @@ pub enum DatabaseAccessError {
 
 impl Database {
     pub fn new() -> Result<Self, DatabaseInitError> {
+        // TODO get path from arguments
         let connection = Connection::open("boiler-watch.db").map_err(DatabaseInitError::Open)?;
 
         connection
@@ -98,7 +99,7 @@ impl Database {
 
     pub fn load_temperatures_since(
         &self,
-        since: i64,
+        since: u64,
     ) -> Result<Vec<TemperaturesByTime>, DatabaseAccessError> {
         let dates = self.load_dates_distinct_since(since)?;
 
@@ -125,7 +126,7 @@ impl Database {
                     .collect::<Result<Vec<Temperature>, _>>()
                     .map_err(DatabaseAccessError::Read)?;
 
-                let temperatures_by_time = TemperaturesByTime::new(date.to_string(), temperatures);
+                let temperatures_by_time = TemperaturesByTime::new(date.to_owned(), temperatures);
 
                 Ok(temperatures_by_time)
             })
@@ -162,13 +163,10 @@ impl Database {
             .collect::<Result<Vec<Temperature>, _>>()
             .map_err(DatabaseAccessError::Read)?;
 
-        return Ok(Some(TemperaturesByTime::new(
-            date_max.to_string(),
-            temperatures,
-        )));
+        return Ok(Some(TemperaturesByTime::new(date_max, temperatures)));
     }
 
-    fn load_dates_distinct_since(&self, since: i64) -> Result<Vec<u64>, DatabaseAccessError> {
+    fn load_dates_distinct_since(&self, since: u64) -> Result<Vec<u64>, DatabaseAccessError> {
         let mut statement = self
             .connection
             .prepare(
@@ -198,7 +196,7 @@ impl Database {
         let mut date_iter = statement
             .query_map([], |row| {
                 let max_date: u64 = row.get(0)?;
-                Ok(max_date)
+                Ok(max_date as u64)
             })
             .map_err(DatabaseAccessError::Read)?;
 

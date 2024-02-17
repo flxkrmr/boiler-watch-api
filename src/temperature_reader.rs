@@ -1,6 +1,6 @@
 use crate::temperature_recorder::Temperature;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::fs::read_to_string;
 use std::num::ParseIntError;
 
@@ -14,12 +14,12 @@ pub enum TemperatureReaderError {
     SensorParse(ParseIntError, Sensor, String),
 }
 
-#[derive(Deserialize, Debug)]
-struct SensorConfig {
+#[derive(Deserialize, Serialize, Debug)]
+pub struct SensorConfig {
     sensors: Vec<Sensor>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Sensor {
     name: String,
     path: String,
@@ -30,11 +30,18 @@ impl TemperatureReader {
         Self {}
     }
 
-    pub fn read(&self) -> Result<Vec<Temperature>, TemperatureReaderError> {
+    pub fn read_config(config_file_path: &str) -> Result<SensorConfig, TemperatureReaderError> {
         let sensor_file =
-            read_to_string("Sensor.toml").map_err(TemperatureReaderError::ConfigRead)?;
+            read_to_string(config_file_path).map_err(TemperatureReaderError::ConfigRead)?;
         let sensor_config: SensorConfig =
             toml::from_str(&sensor_file).map_err(TemperatureReaderError::ConfigParse)?;
+
+        Ok(sensor_config)
+    }
+
+    pub fn read(&self) -> Result<Vec<Temperature>, TemperatureReaderError> {
+        // TODO use app arguments
+        let sensor_config = Self::read_config("Sensor.toml")?;
 
         let mut errors = vec![];
         let temperatures: Vec<Temperature> = sensor_config

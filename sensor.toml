@@ -1,15 +1,79 @@
 [[sensors]]
-name = "Sensor 1"
+name = "sensor1"
 path = "/home/nixos/sensors/1/temperature"
 
 [[sensors]]
-name = "Sensor 2"
+name = "sensor2"
 path = "/home/nixos/sensors/2/temperature"
 
 [[sensors]]
-name = "Sensor 3"
+name = "sensor3"
 path = "/home/nixos/sensors/3/temperature"
 
 [[sensors]]
-name = "Sensor 4"
+name = "sensor4"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor5"
+path = "/home/nixos/sensors/1/temperature"
+
+[[sensors]]
+name = "sensor6"
+path = "/home/nixos/sensors/2/temperature"
+
+[[sensors]]
+name = "sensor7"
+path = "/home/nixos/sensors/3/temperature"
+
+[[sensors]]
+name = "sensor8"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor9"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor10"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor11"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor12"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor13"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor14"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor15"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor16"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor17"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor18"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor19"
+path = "/home/nixos/sensors/4/temperature"
+
+[[sensors]]
+name = "sensor20"
 path = "/home/nixos/sensors/4/temperature"

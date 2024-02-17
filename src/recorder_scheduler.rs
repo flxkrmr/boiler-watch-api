@@ -37,13 +37,12 @@ impl RecorderScheduler {
                 log::error!("Error reading time");
                 return;
             } else {
-                date = date_res.unwrap();
+                date = date_res.unwrap() as u64;
             }
 
             match reader.read() {
                 Ok(temperatures) => {
-                    let temperatures_by_time =
-                        TemperaturesByTime::new(date.to_string(), temperatures);
+                    let temperatures_by_time = TemperaturesByTime::new(date, temperatures);
 
                     log::debug!("Successfully read sensors: {:?}", temperatures_by_time);
 
