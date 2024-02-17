@@ -8,7 +8,7 @@ chrono = "0.4.31"
 clokwerk = "0.4.0"
 log = "0.4.20"
 rocket_cors = "0.6.0"
-rusqlite = "0.30.0"
+rusqlite = { "0.30.0", features = ["bundled"] }
 serde = "1.0.130"
 toml = "0.8.8"
 
