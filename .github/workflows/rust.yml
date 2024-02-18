@@ -26,7 +26,7 @@ jobs:
         target: arm-unknown-linux-musleabihf
 
     - name: Install dependencies for cross-compilation
-      run: sudo apt-get install -y gcc-arm-linux-musleabihf
+      run: sudo apt-get install -y musldev
 
     - name: Build binary for Raspberry Pi
       run: cargo build --release --target=arm-unknown-linux-musleabihf
