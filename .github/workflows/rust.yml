@@ -44,7 +44,7 @@ jobs:
       run: cargo build --release --target=armv7-unknown-linux-gnueabihf
 
     - name: Upload binary
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: boiler-watch-api_arm-linux-gnueabihf
         path: target/arm-unknown-linux-gnueabihf/release/boiler-watch-api
