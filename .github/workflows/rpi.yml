@@ -1,0 +1,38 @@
+name: Cross-compilation Raspberry Pi
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+    
+    - name: Rust build and test
+      run: cargo test
+
+    - name: Set up cross-compilation toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: arm-unknown-linux-gnueabihf
+    - run: rustup target add arm-unknown-linux-gnueabihf
+    - run: sudo apt-get update && sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
+
+    - name: Build cross-compilation binary
+      run: cargo build --release --target=arm-unknown-linux-gnueabihf
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: boiler-watch-api_arm-linux-gnueabihf
+        path: target/arm-unknown-linux-gnueabihf/release/boiler-watch-api
