@@ -19,7 +19,7 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - run: sudo apt-get update && sudo apt-get install -y rustup
+    - run: apt-get update && apt-get install -y rustup
     - run: rustup default stable
 
     - name: Rust build and test
@@ -31,7 +31,7 @@ jobs:
         toolchain: stable
         target: arm-unknown-linux-gnueabihf
     - run: rustup target add arm-unknown-linux-gnueabihf
-    - run: sudo apt-get update && sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
+    - run: apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
 
     - name: Build cross-compilation binary
       run: cargo build --release --target=arm-unknown-linux-gnueabihf
