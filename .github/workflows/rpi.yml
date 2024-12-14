@@ -13,14 +13,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: debian:11
+      image: ragnaroek/rust-raspberry:1.81.0
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
-
-    - run: apt-get update && apt-get install -y rustup
-    - run: rustup default stable
 
     - name: Rust build and test
       run: cargo test
