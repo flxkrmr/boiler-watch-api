@@ -12,11 +12,13 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: debian:11
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
-    
+
     - name: Rust build and test
       run: cargo test
 
