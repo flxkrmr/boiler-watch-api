@@ -16,6 +16,7 @@ pub enum DatabaseInitError {
 pub enum DatabaseAccessError {
     Read(rusqlite::Error),
     Write(rusqlite::Error),
+    Delete(rusqlite::Error),
     NoConfigFound,
 }
 
@@ -28,15 +29,15 @@ impl Database {
             .execute(
                 "create table if not exists recorder_config (
                  interval_seconds integer not null,
-                 keep integer not null )",
+                 keep_days integer not null )",
                 (),
             )
             .map_err(DatabaseInitError::CreateDatabases)?;
 
         connection
             .execute(
-                "insert into recorder_config (interval_seconds, keep)
-                select 15, 60
+                "insert into recorder_config (interval_seconds, keep_days)
+                select 15, 30
                 where not exists (select * from recorder_config)",
                 (),
             )
@@ -59,7 +60,7 @@ impl Database {
         let mut statement = self
             .connection
             .prepare(
-                "select interval_seconds, keep 
+                "select interval_seconds, keep_days 
                 from recorder_config",
             )
             .map_err(DatabaseAccessError::Read)?;
@@ -67,8 +68,8 @@ impl Database {
         let mut config_iter = statement
             .query_map([], |row| {
                 let interval_seconds = row.get(0)?;
-                let keep = row.get(1)?;
-                return Ok(RecorderConfig::new(interval_seconds, keep));
+                let keep_days = row.get(1)?;
+                return Ok(RecorderConfig::new(interval_seconds, keep_days));
             })
             .map_err(DatabaseAccessError::Read)?;
 
@@ -89,8 +90,8 @@ impl Database {
 
         self.connection
             .execute(
-                "insert into recorder_config (interval_seconds, keep) values (?1, ?2)",
-                (&config.interval_seconds, &config.keep),
+                "insert into recorder_config (interval_seconds, keep_days) values (?1, ?2)",
+                (&config.interval_seconds, &config.keep_days),
             )
             .map_err(DatabaseAccessError::Write)?;
 
@@ -233,5 +234,17 @@ impl Database {
             Ok(_) => Ok(()),
             Err(err) => Err(err),
         }
+    }
+
+    pub fn delete_old_temperatures(&self) -> Result<usize, DatabaseAccessError> {
+        let config = self.load_recorder_config()?;
+        let keep_days = config.keep_days;
+
+        self.connection
+            .execute(
+                "delete from temperatures where date < (strftime('%s', 'now') - ?1 * 86400) * 1000",
+                [keep_days],
+            )
+            .map_err(DatabaseAccessError::Delete)
     }
 }

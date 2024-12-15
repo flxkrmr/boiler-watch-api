@@ -17,7 +17,7 @@ pub enum RecorderSchedulerError {
 
 impl RecorderScheduler {
     pub fn new() -> Self {
-        return Self { thread: None };
+        Self { thread: None }
     }
 
     pub fn start(&mut self, config: &RecorderConfig) -> Result<(), RecorderSchedulerError> {
@@ -53,6 +53,12 @@ impl RecorderScheduler {
                     }
                 }
                 Err(error) => log::error!("Error reading sensors {:?}", error),
+            }
+
+            if let Err(error) = db.delete_old_temperatures() {
+                log::error!("Error deleting old temperatures from database {:?}", error);
+            } else {
+                log::debug!("Deleted old temperatures from database");
             }
         });
 
