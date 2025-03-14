@@ -3,15 +3,15 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub struct RecorderConfig {
     pub interval_seconds: u32,
-    pub keep: u64,
+    pub keep_days: u64,
 }
 
 impl RecorderConfig {
-    pub fn new(interval_seconds: u32, keep: u64) -> Self {
-        return Self {
+    pub fn new(interval_seconds: u32, keep_days: u64) -> Self {
+        Self {
             interval_seconds,
-            keep,
-        };
+            keep_days,
+        }
     }
 }
 
@@ -43,7 +43,7 @@ pub struct TemperaturesByTime {
 
 impl TemperaturesByTime {
     pub fn new(date: u64, temperatures: Vec<Temperature>) -> Self {
-        return Self { date, temperatures };
+        Self { date, temperatures }
     }
 
     pub fn date(&self) -> u64 {
